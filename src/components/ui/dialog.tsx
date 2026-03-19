@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog as BaseDialog } from "@base-ui/react/dialog";
-import type * as React from "react";
+import * as React from "react";
 
 export interface DialogProps {
 	open?: boolean;
@@ -21,15 +21,33 @@ export interface DialogTriggerProps {
 	children: React.ReactNode;
 	className?: string;
 	disabled?: boolean;
+	asChild?: boolean;
 }
 
 export function DialogTrigger({
 	children,
 	className,
 	disabled,
+	asChild = false,
+	...props
 }: DialogTriggerProps) {
+	if (asChild && React.isValidElement(children)) {
+		return React.cloneElement(
+			children as React.ReactElement<Record<string, unknown>>,
+			{
+				className:
+					`${className || ""} ${((children as React.ReactElement<Record<string, unknown>>).props.className as string) || ""}`.trim(),
+				disabled:
+					disabled ??
+					((children as React.ReactElement<Record<string, unknown>>).props
+						.disabled as boolean | undefined),
+				...props,
+			},
+		);
+	}
+
 	return (
-		<BaseDialog.Trigger className={className} disabled={disabled}>
+		<BaseDialog.Trigger className={className} disabled={disabled} {...props}>
 			{children}
 		</BaseDialog.Trigger>
 	);

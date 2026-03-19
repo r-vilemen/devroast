@@ -229,29 +229,9 @@ export default function ComponentsPage() {
 			<section className="mb-12">
 				<h2 className="font-mono text-xl mb-4 text-[#10B981]">{"//"} dialog</h2>
 				<Dialog>
-					<DialogTrigger>
+					<DialogTrigger asChild>
 						<Button variant="secondary">Open Dialog</Button>
 					</DialogTrigger>
-					<DialogBackdrop />
-					<DialogPopup>
-						<DialogTitle>Confirm Action</DialogTitle>
-						<DialogDescription>
-							Are you sure you want to proceed with this action?
-						</DialogDescription>
-						<DialogContent>
-							<p className="text-[#A3A3A3] font-mono text-sm">
-								This action cannot be undone.
-							</p>
-						</DialogContent>
-						<DialogFooter>
-							<DialogClose>
-								<Button variant="secondary">Cancel</Button>
-							</DialogClose>
-							<DialogClose>
-								<Button variant="primary">Confirm</Button>
-							</DialogClose>
-						</DialogFooter>
-					</DialogPopup>
 				</Dialog>
 			</section>
 
