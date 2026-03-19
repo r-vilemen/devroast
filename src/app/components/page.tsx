@@ -1,6 +1,4 @@
-"use client";
-
-import { useState } from "react";
+import { CodeBlockShowcase } from "@/components/code-block-showcase";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -18,10 +16,6 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { DiffLine } from "@/components/ui/diff-line";
-import {
-	HighlightedCodeBlock,
-	type SupportedLanguage,
-} from "@/components/ui/highlighted-code-block-client";
 import { LanguagePicker } from "@/components/ui/language-picker";
 import { Navbar, NavLink, NavLogo } from "@/components/ui/navbar";
 import { ScoreRing } from "@/components/ui/score-ring";
@@ -42,9 +36,6 @@ const sampleCode = `function calculateTotal(items) {
 }`;
 
 export default function ComponentsPage() {
-	const [selectedLang, setSelectedLang] =
-		useState<SupportedLanguage>("javascript");
-
 	return (
 		<div className="min-h-screen bg-[#0A0A0A] text-[#FAFAFA] p-8">
 			<h1 className="font-mono text-3xl font-bold mb-8 text-[#10B981]">
@@ -122,25 +113,7 @@ export default function ComponentsPage() {
 				</Card>
 			</section>
 
-			<section className="mb-12">
-				<h2 className="font-mono text-xl mb-4 text-[#10B981]">
-					{"//"} highlighted_code_block (Shiki)
-				</h2>
-				<div className="space-y-4">
-					<div className="flex items-center gap-4">
-						<LanguagePicker
-							value={selectedLang}
-							onValueChange={setSelectedLang}
-						/>
-						<CopyButton code={sampleCode} />
-					</div>
-					<HighlightedCodeBlock
-						code={sampleCode}
-						language={selectedLang}
-						filename="calculate.js"
-					/>
-				</div>
-			</section>
+			<CodeBlockShowcase />
 
 			<section className="mb-12">
 				<h2 className="font-mono text-xl mb-4 text-[#10B981]">
