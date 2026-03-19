@@ -1,93 +1,81 @@
-"use client";
+import { cacheLife } from "next/cache";
+import Link from "next/link";
+import { Suspense } from "react";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
+import { HomeEditor } from "./home-editor";
+import { HomeLeaderboard } from "./home-leaderboard";
+import { HomeLeaderboardSkeleton } from "./home-leaderboard-skeleton";
+import { HomeStats } from "./home-stats";
 
-import { tv } from "tailwind-variants";
-import { Button } from "@/components/ui/button";
-import { CodeExamplesSection } from "@/components/ui/code-examples-section";
-import { EditorPreviewDemo } from "@/components/ui/editor-preview";
-import { FooterStats } from "@/components/ui/footer-stats";
+export default async function HomePage() {
+  "use cache";
+  cacheLife("hourly");
 
-const pageContainer = tv({
-	base: "min-h-screen bg-[#0C0C0C] text-[#FAFAFA]",
-});
+  prefetch(trpc.roast.getStats.queryOptions());
 
-const heroSection = tv({
-	base: "flex flex-col items-center justify-center px-6 py-24 text-center",
-});
+  return (
+    <main className="flex flex-col items-center">
+      {/* Hero */}
+      <section className="flex flex-col items-center gap-3 pt-20 px-10">
+        <h1 className="flex items-center gap-3 font-mono text-4xl font-bold">
+          <span className="text-accent-green">$</span>
+          <span className="text-text-primary">
+            paste your code. get roasted.
+          </span>
+        </h1>
+        <p className="font-mono text-sm text-text-secondary">
+          {
+            "// drop your code below and we'll rate it — brutally honest or full roast mode"
+          }
+        </p>
+      </section>
 
-const heroTitle = tv({
-	base: "font-mono text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight max-w-4xl",
-});
+      {/* Editor + Actions */}
+      <section className="w-full max-w-5xl px-10 pt-8">
+        <HomeEditor />
+      </section>
 
-const heroSubtitle = tv({
-	base: "font-mono text-base md:text-lg text-[#6B7280] mt-6 max-w-2xl",
-});
+      {/* Footer Stats */}
+      <Suspense>
+        <HydrateClient>
+          <HomeStats />
+        </HydrateClient>
+      </Suspense>
 
-const ctaSection = tv({
-	base: "flex items-center gap-4 mt-10",
-});
+      {/* Spacer */}
+      <div className="h-15" />
 
-const editorSection = tv({
-	base: "flex flex-col items-center px-6 py-16",
-});
+      {/* Leaderboard Preview */}
+      <section className="flex flex-col gap-6 w-full max-w-5xl px-10 pb-15">
+        {/* Title Row */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-sm font-bold text-accent-green">
+              {"//"}
+            </span>
+            <span className="font-mono text-sm font-bold text-text-primary">
+              shame_leaderboard
+            </span>
+          </div>
 
-const sectionTitle = tv({
-	base: "font-mono text-2xl font-semibold text-[#FAFAFA] mb-2 text-center",
-});
+          <Link
+            href="/leaderboard"
+            className="font-mono text-xs text-text-secondary border border-border-primary px-3 py-1.5 hover:bg-bg-elevated transition-colors"
+          >
+            $ view_all {">>"}
+          </Link>
+        </div>
 
-const sectionSubtitle = tv({
-	base: "font-mono text-sm text-[#6B7280] mb-8 text-center",
-});
+        {/* Subtitle */}
+        <p className="font-mono text-[13px] text-text-tertiary -mt-2">
+          {"// the worst code on the internet, ranked by shame"}
+        </p>
 
-const examplesSection = tv({
-	base: "flex flex-col items-center px-6 py-16 bg-[#0A0A0A]",
-});
-
-const footer = tv({
-	base: "flex flex-col items-center px-6 py-8 border-t border-[#2A2A2A]",
-});
-
-export default function Home() {
-	return (
-		<main className={pageContainer()}>
-			<section className={heroSection()}>
-				<h1 className={heroTitle()}>
-					<span className="text-[#10B981]">Level up</span> your code quality
-					with <span className="text-[#10B981]">AI-powered</span> code reviews
-				</h1>
-				<p className={heroSubtitle()}>
-					Upload your code and get brutally honest feedback from our AI.
-					Discover security vulnerabilities, performance issues, and best
-					practices that will make your code unstoppable.
-				</p>
-				<div className={ctaSection()}>
-					<Button size="lg" variant="primary">
-						Get Started
-					</Button>
-					<Button size="lg" variant="secondary">
-						Try Demo
-					</Button>
-				</div>
-			</section>
-
-			<section className={editorSection()}>
-				<h2 className={sectionTitle()}>See it in action</h2>
-				<p className={sectionSubtitle()}>
-					Upload your code and get instant feedback
-				</p>
-				<EditorPreviewDemo />
-			</section>
-
-			<section className={examplesSection()}>
-				<h2 className={sectionTitle()}>What we catch</h2>
-				<p className={sectionSubtitle()}>
-					From security vulnerabilities to code smells, we have you covered
-				</p>
-				<CodeExamplesSection />
-			</section>
-
-			<footer className={footer()}>
-				<FooterStats />
-			</footer>
-		</main>
-	);
+        {/* Leaderboard Table + Footer (async, with skeleton fallback) */}
+        <Suspense fallback={<HomeLeaderboardSkeleton />}>
+          <HomeLeaderboard />
+        </Suspense>
+      </section>
+    </main>
+  );
 }
