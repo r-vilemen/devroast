@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import { CopyButton } from "@/components/ui/copy-button";
-import {
-	HighlightedCodeBlock,
-	type SupportedLanguage,
-} from "@/components/ui/highlighted-code-block-client";
+import type { SupportedLanguage } from "@/components/ui/highlighted-code-block";
+import { HighlightedCodeBlockClient } from "@/components/ui/highlighted-code-block-client";
 import { LanguagePicker } from "@/components/ui/language-picker";
 
 const sampleCode = `function calculateTotal(items) {
@@ -35,7 +33,7 @@ export function CodeBlockShowcase() {
 					/>
 					<CopyButton code={sampleCode} />
 				</div>
-				<HighlightedCodeBlock
+				<HighlightedCodeBlockClient
 					code={sampleCode}
 					language={selectedLang}
 					filename="calculate.js"
