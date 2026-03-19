@@ -47,6 +47,8 @@ src/
 
 ## Key Decisions
 
+- Always ask Me questions as needed to get a better result
+- Never commit without asking me or asking me
 - `CodeBlock` is an async React Server Component using shiki with vesper theme
 - `Toggle` uses `@base-ui/react` Switch primitive for accessibility
 - `ScoreRing` has a single fixed size (180px)
