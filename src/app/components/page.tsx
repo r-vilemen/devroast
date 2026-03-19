@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { DiffLine } from "@/components/ui/diff-line";
 import { LanguagePicker } from "@/components/ui/language-picker";
-import { Navbar, NavLink, NavLogo } from "@/components/ui/navbar";
+import { Navbar } from "@/components/ui/navbar";
 import { ScoreRing } from "@/components/ui/score-ring";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Tabs } from "@/components/ui/tabs";
@@ -249,14 +249,7 @@ export default function ComponentsPage() {
 			<section className="mb-12">
 				<h2 className="font-mono text-xl mb-4 text-[#10B981]">{"//"} navbar</h2>
 				<div className="w-[560px]">
-					<Navbar>
-						<NavLogo>
-							<span className="text-[#10B981] text-xl font-bold">{">"}</span>
-							<span className="text-[#FAFAFA] font-mono text-lg">devroast</span>
-						</NavLogo>
-						<span className="flex-1" />
-						<NavLink href="#">leaderboard</NavLink>
-					</Navbar>
+					<Navbar />
 				</div>
 			</section>
 
