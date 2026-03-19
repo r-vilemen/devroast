@@ -8,7 +8,7 @@
 - **Validation:** Zod
 - **Styling:** Tailwind CSS v4 with `@theme` variables, `tailwind-variants` for component variants
 - **Linting:** Biome 2.4 (formatter + linter, `tailwindDirectives: true`)
-- **Package manager:** pnpm
+- **Package manager:** npm
 - **Language:** TypeScript (strict)
 
 ## Conventions
