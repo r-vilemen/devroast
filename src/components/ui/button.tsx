@@ -1,44 +1,57 @@
-import { type ButtonHTMLAttributes, forwardRef } from "react";
+import type { ComponentProps } from "react";
 import { tv, type VariantProps } from "tailwind-variants";
 
 const button = tv({
-	base: "inline-flex items-center justify-center gap-2 font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] disabled:pointer-events-none disabled:opacity-50",
-	variants: {
-		variant: {
-			primary:
-				"bg-[#10B981] text-[#0A0A0A] hover:bg-[#0D9668] active:bg-[#0A8A5C]",
-			secondary:
-				"border border-[#2A2A2A] text-[#FAFAFA] hover:bg-[#2A2A2A] active:bg-[#3A3A3A]",
-			link: "border border-[#2A2A2A] text-[#6B7280] hover:text-[#FAFAFA] hover:border-[#3A3A3A]",
-		},
-		size: {
-			sm: "h-8 px-4 py-2 text-xs",
-			md: "h-10 px-6 py-2.5 text-sm",
-			lg: "h-12 px-8 py-3 text-base",
-		},
-	},
-	defaultVariants: {
-		variant: "primary",
-		size: "md",
-	},
+  base: [
+    "inline-flex items-center justify-center gap-2",
+    "font-mono font-medium cursor-pointer",
+    "transition-colors duration-150",
+    "disabled:opacity-50 disabled:cursor-not-allowed",
+  ],
+  variants: {
+    variant: {
+      primary: [
+        "bg-accent-green text-bg-page",
+        "enabled:hover:bg-green-primary",
+        "enabled:active:bg-accent-green/80",
+      ],
+      secondary: [
+        "bg-transparent text-text-primary",
+        "border border-border-primary",
+        "enabled:hover:bg-bg-elevated",
+        "enabled:active:bg-bg-surface",
+      ],
+      ghost: [
+        "bg-transparent text-text-secondary",
+        "border border-border-primary",
+        "enabled:hover:text-text-primary",
+        "enabled:hover:bg-bg-elevated",
+        "enabled:active:bg-bg-surface",
+      ],
+      danger: [
+        "bg-accent-red text-white",
+        "enabled:hover:bg-destructive",
+        "enabled:active:bg-accent-red/80",
+      ],
+    },
+    size: {
+      sm: "px-3 py-1.5 text-xs",
+      md: "px-4 py-2 text-xs",
+      lg: "px-6 py-2.5 text-[13px]",
+    },
+  },
+  defaultVariants: {
+    variant: "primary",
+    size: "lg",
+  },
 });
 
-export interface ButtonProps
-	extends ButtonHTMLAttributes<HTMLButtonElement>,
-		VariantProps<typeof button> {}
+type ButtonVariants = VariantProps<typeof button>;
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-	({ className, variant, size, ...props }, ref) => {
-		return (
-			<button
-				ref={ref}
-				className={button({ variant, size, className })}
-				{...props}
-			/>
-		);
-	},
-);
+type ButtonProps = ComponentProps<"button"> & ButtonVariants;
 
-Button.displayName = "Button";
+function Button({ variant, size, className, ...props }: ButtonProps) {
+  return <button className={button({ variant, size, className })} {...props} />;
+}
 
-export { Button };
+export { Button, button, type ButtonProps, type ButtonVariants };

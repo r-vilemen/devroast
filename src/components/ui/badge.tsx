@@ -1,60 +1,45 @@
+import type { ComponentProps } from "react";
 import { tv, type VariantProps } from "tailwind-variants";
 
 const badge = tv({
-	base: "inline-flex items-center gap-2 font-mono text-xs font-normal",
-	variants: {
-		variant: {
-			critical: "text-[#EF4444]",
-			warning: "text-[#F59E0B]",
-			good: "text-[#10B981]",
-			verdict: "text-[#EF4444]",
-		},
-	},
-	defaultVariants: {
-		variant: "good",
-	},
+  base: "inline-flex items-center gap-2 font-mono text-xs",
+  variants: {
+    variant: {
+      critical: "text-accent-red",
+      warning: "text-accent-amber",
+      good: "text-accent-green",
+    },
+  },
+  defaultVariants: {
+    variant: "critical",
+  },
 });
 
-const dot = tv({
-	base: "rounded-full",
-	variants: {
-		variant: {
-			critical: "bg-[#EF4444]",
-			warning: "bg-[#F59E0B]",
-			good: "bg-[#10B981]",
-			verdict: "bg-[#EF4444]",
-		},
-		size: {
-			sm: "h-2 w-2",
-			md: "h-2.5 w-2.5",
-		},
-	},
-	defaultVariants: {
-		variant: "good",
-		size: "md",
-	},
+const badgeDot = tv({
+  base: "size-2 rounded-full",
+  variants: {
+    variant: {
+      critical: "bg-accent-red",
+      warning: "bg-accent-amber",
+      good: "bg-accent-green",
+    },
+  },
+  defaultVariants: {
+    variant: "critical",
+  },
 });
 
-export interface BadgeProps extends VariantProps<typeof badge> {
-	className?: string;
-	children: React.ReactNode;
-	showDot?: boolean;
-	dotSize?: VariantProps<typeof dot>["size"];
+type BadgeVariants = VariantProps<typeof badge>;
+
+type BadgeProps = ComponentProps<"span"> & BadgeVariants;
+
+function Badge({ variant, className, children, ...props }: BadgeProps) {
+  return (
+    <span className={badge({ variant, className })} {...props}>
+      <span className={badgeDot({ variant })} />
+      {children}
+    </span>
+  );
 }
 
-export function Badge({
-	className,
-	variant,
-	children,
-	showDot = true,
-	dotSize = "md",
-}: BadgeProps) {
-	return (
-		<span className={badge({ variant, className })}>
-			{showDot && <span className={dot({ variant, size: dotSize })} />}
-			{children}
-		</span>
-	);
-}
-
-export { badge, dot };
+export { Badge, badge, type BadgeProps, type BadgeVariants };

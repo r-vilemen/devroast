@@ -1,122 +1,84 @@
-"use client";
+import type { ComponentProps } from "react";
+import { twMerge } from "tailwind-merge";
 
-import { useId } from "react";
-import { tv } from "tailwind-variants";
+type ScoreRingProps = ComponentProps<"div"> & {
+  score: number;
+  total?: number;
+};
 
-const scoreRing = tv({
-	base: "relative inline-flex items-center justify-center",
-	variants: {
-		size: {
-			sm: "h-24 w-24",
-			md: "h-[180px] w-[180px]",
-			lg: "h-48 w-48",
-		},
-	},
-	defaultVariants: {
-		size: "md",
-	},
-});
-
-const scoreText = tv({
-	base: "flex flex-col items-center justify-center",
-});
-
-const scoreValue = tv({
-	base: "font-mono font-bold leading-none",
-	variants: {
-		size: {
-			sm: "text-3xl",
-			md: "text-5xl",
-			lg: "text-7xl",
-		},
-	},
-});
-
-const scoreMax = tv({
-	base: "font-mono leading-none",
-	variants: {
-		size: {
-			sm: "text-xs text-[#737373]",
-			md: "text-base text-[#737373]",
-			lg: "text-xl text-[#737373]",
-		},
-	},
-});
-
-export interface ScoreRingProps {
-	value: number;
-	max?: number;
-	size?: "sm" | "md" | "lg";
-	className?: string;
+function scoreGradientId(score: number) {
+  return `score-gradient-${score.toString().replace(".", "-")}`;
 }
 
-export function ScoreRing({
-	value,
-	max = 10,
-	size = "md",
-	className,
-}: ScoreRingProps) {
-	const percentage = (value / max) * 100;
-	const circumference = 2 * Math.PI * 80;
-	const strokeDashoffset = circumference - (percentage / 100) * circumference;
+const SIZE = 180;
 
-	const sizeConfig = {
-		sm: { width: 96, strokeWidth: 4 },
-		md: { width: 180, strokeWidth: 4 },
-		lg: { width: 192, strokeWidth: 4 },
-	};
+function ScoreRing({ score, total = 10, className, ...props }: ScoreRingProps) {
+  const strokeWidth = 4;
+  const radius = (SIZE - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const ratio = Math.min(score / total, 1);
+  const filled = circumference * ratio;
+  const gap = circumference - filled;
+  const gradientId = scoreGradientId(score);
 
-	const config = sizeConfig[size];
-	const gradientId = useId();
+  return (
+    <div
+      className={twMerge(
+        "relative inline-flex items-center justify-center",
+        className,
+      )}
+      style={{ width: SIZE, height: SIZE }}
+      {...props}
+    >
+      <svg
+        width={SIZE}
+        height={SIZE}
+        viewBox={`0 0 ${SIZE} ${SIZE}`}
+        className="absolute inset-0 -rotate-90"
+        role="img"
+        aria-label={`Score: ${score} out of ${total}`}
+      >
+        <defs>
+          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="var(--color-accent-green)" />
+            <stop offset="100%" stopColor="var(--color-accent-amber)" />
+          </linearGradient>
+        </defs>
 
-	return (
-		<div className={scoreRing({ size, className })}>
-			<svg
-				width={config.width}
-				height={config.width}
-				viewBox="0 0 180 180"
-				className="absolute inset-0 -rotate-90"
-				role="img"
-				aria-label={`Score: ${value} out of ${max}`}
-			>
-				<defs>
-					<linearGradient
-						id={gradientId}
-						gradientUnits="userSpaceOnUse"
-						x1="0%"
-						y1="0%"
-						x2="100%"
-						y2="0%"
-					>
-						<stop offset="0%" stopColor="#10B981" />
-						<stop offset="65%" stopColor="#F59E0B" />
-						<stop offset="65.1%" stopColor="transparent" />
-					</linearGradient>
-				</defs>
-				<circle
-					cx="90"
-					cy="90"
-					r="80"
-					fill="transparent"
-					stroke="#2A2A2A"
-					strokeWidth={config.strokeWidth}
-				/>
-				<circle
-					cx="90"
-					cy="90"
-					r="80"
-					fill="transparent"
-					stroke={`url(#${gradientId})`}
-					strokeWidth={config.strokeWidth}
-					strokeDasharray={circumference}
-					strokeDashoffset={strokeDashoffset}
-					strokeLinecap="round"
-				/>
-			</svg>
-			<div className={scoreText({})}>
-				<span className={scoreValue({ size })}>{value.toFixed(1)}</span>
-				<span className={scoreMax({ size })}>/{max}</span>
-			</div>
-		</div>
-	);
+        {/* Background ring */}
+        <circle
+          cx={SIZE / 2}
+          cy={SIZE / 2}
+          r={radius}
+          fill="none"
+          stroke="var(--color-border-primary)"
+          strokeWidth={strokeWidth}
+        />
+
+        {/* Score arc */}
+        <circle
+          cx={SIZE / 2}
+          cy={SIZE / 2}
+          r={radius}
+          fill="none"
+          stroke={`url(#${gradientId})`}
+          strokeWidth={strokeWidth}
+          strokeDasharray={`${filled} ${gap}`}
+          strokeLinecap="round"
+        />
+      </svg>
+
+      {/* Center score */}
+      <div className="flex items-end gap-0.5">
+        <span className="font-mono text-5xl font-bold text-text-primary leading-none">
+          {score % 1 === 0 ? score.toFixed(1) : score.toString()}
+        </span>
+        <span className="font-mono text-base text-text-tertiary leading-none mb-1">
+          /{total}
+        </span>
+      </div>
+    </div>
+  );
 }
+
+export { ScoreRing, type ScoreRingProps };

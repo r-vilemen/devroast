@@ -1,104 +1,75 @@
-import { tv } from "tailwind-variants";
+import type { BundledLanguage } from "shiki";
+import { codeToHtml } from "shiki";
+import { twMerge } from "tailwind-merge";
 
-const codeBlock = tv({
-	base: "bg-[#111111] border border-[#2A2A2A] overflow-hidden font-mono",
-	variants: {
-		size: {
-			sm: "text-xs",
-			md: "text-sm",
-		},
-	},
-	defaultVariants: {
-		size: "md",
-	},
-});
+type CodeBlockProps = {
+  code: string;
+  lang: BundledLanguage;
+  className?: string;
+};
 
-const codeHeader = tv({
-	base: "flex items-center gap-3 h-10 px-4 border-b border-[#2A2A2A]",
-});
+async function CodeBlock({ code, lang, className }: CodeBlockProps) {
+  "use cache";
 
-const codeBody = tv({
-	base: "flex",
-});
+  const html = await codeToHtml(code, {
+    lang,
+    theme: "vesper",
+  });
 
-const lineNumbers = tv({
-	base: "flex flex-col gap-1.5 py-3 px-2.5 bg-[#0F0F0F] border-r border-[#2A2A2A] text-right w-10 select-none",
-});
+  const lines = code.split("\n");
 
-const codeLines = tv({
-	base: "flex flex-col gap-1.5 py-3 px-3 flex-1 overflow-x-auto",
-});
+  return (
+    <div
+      className={twMerge(
+        "border border-border-primary overflow-hidden",
+        className,
+      )}
+    >
+      <div className="flex bg-bg-input">
+        {/* Line numbers */}
+        <div className="flex flex-col items-end gap-1.5 py-3 px-2.5 w-10 border-r border-border-primary bg-bg-surface select-none">
+          {lines.map((_, i) => (
+            <span
+              key={`ln-${i.toString()}`}
+              className="font-mono text-[13px] leading-tight text-text-tertiary"
+            >
+              {i + 1}
+            </span>
+          ))}
+        </div>
 
-const codeLine = tv({
-	base: "leading-6 text-[#FAFAFA]",
-	variants: {
-		type: {
-			normal: "text-[#FAFAFA]",
-			comment: "text-[#8B8B8B]",
-			keyword: "text-[#C678DD]",
-			string: "text-[#98C379]",
-			number: "text-[#D19A66]",
-		},
-	},
-	defaultVariants: {
-		type: "normal",
-	},
-});
-
-export interface CodeBlockProps extends React.HTMLAttributes<HTMLDivElement> {
-	size?: "sm" | "md";
+        {/* Code */}
+        <div
+          className="flex-1 p-3 overflow-x-auto font-mono text-[13px] leading-tight [&_pre]:!bg-transparent [&_pre]:!m-0 [&_pre]:!p-0 [&_code]:!bg-transparent [&_.line]:leading-[1.65]"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: shiki generates trusted HTML from code strings server-side
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      </div>
+    </div>
+  );
 }
 
-export interface CodeHeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
+type CodeBlockHeaderProps = {
+  filename?: string;
+};
 
-export interface CodeLineProps
-	extends Omit<React.HTMLAttributes<HTMLDivElement>, "className"> {
-	type?: "normal" | "comment" | "keyword" | "string" | "number";
-	className?: string;
+function CodeBlockHeader({ filename }: CodeBlockHeaderProps) {
+  return (
+    <div className="flex items-center gap-3 h-10 px-4 border-b border-border-primary">
+      <span className="size-2.5 rounded-full bg-accent-red" />
+      <span className="size-2.5 rounded-full bg-accent-amber" />
+      <span className="size-2.5 rounded-full bg-accent-green" />
+      <span className="flex-1" />
+      {filename && (
+        <span className="font-mono text-xs text-text-tertiary">{filename}</span>
+      )}
+    </div>
+  );
 }
 
-export function CodeLine({
-	className,
-	type = "normal",
-	...props
-}: CodeLineProps) {
-	return <div className={codeLine({ type, className })} {...props} />;
-}
-
-export function CodeBlock({ className, size, ...props }: CodeBlockProps) {
-	return <div className={codeBlock({ size, className })} {...props} />;
-}
-
-export function CodeHeader({ className, ...props }: CodeHeaderProps) {
-	return <div className={codeHeader({ className })} {...props} />;
-}
-
-export function CodeBody({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-	return <div className={codeBody({ className })} {...props} />;
-}
-
-export function CodeLineNumbersContainer({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-	return <div className={lineNumbers({ className })} {...props} />;
-}
-
-export function CodeLineNumber({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLSpanElement>) {
-	return <span className={`text-[#737373] ${className || ""}`} {...props} />;
-}
-
-export function CodeLines({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-	return <div className={codeLines({ className })} {...props} />;
-}
-
-export { codeBlock, codeBody, codeHeader, codeLine, codeLines, lineNumbers };
+export {
+  CodeBlock,
+  CodeBlockHeader,
+  type CodeBlockProps,
+  type CodeBlockHeaderProps,
+};
