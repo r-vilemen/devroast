@@ -1,181 +1,55 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# DevRoast — Project Guidelines
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+## Stack
 
-<!-- BEGIN:devroast-patterns -->
+- **Framework:** Next.js 16 (App Router, React Compiler, Turbopack)
+- **API layer:** tRPC v11 + TanStack React Query v5 (see `src/trpc/AGENTS.md`)
+- **Database:** Drizzle ORM + PostgreSQL 16 (Docker Compose)
+- **Validation:** Zod
+- **Styling:** Tailwind CSS v4 with `@theme` variables, `tailwind-variants` for component variants
+- **Linting:** Biome 2.4 (formatter + linter, `tailwindDirectives: true`)
+- **Package manager:** pnpm
+- **Language:** TypeScript (strict)
 
-# DevRoast - Padrões e Boas Práticas
+## Conventions
 
-## 1. Componentes UI
+- **Language:** Portuguese for communication, English for code
+- **Exports:** Always named exports. Never `export default` (except Next.js pages).
+- **Components:** Extend native HTML props via `ComponentProps<"element">`. Use `tv()` for variants. Use composition pattern (sub-components) for complex components with 2+ content areas.
+- **Class merging:** Use `tv({ className })` for components with variants. Use `twMerge()` for components without variants. Never string interpolation.
+- **Colors:** Defined in `@theme` block (`--color-*`), used as canonical Tailwind classes (`bg-accent-green`, not `bg-(--color-accent-green)`). Exception: SVG attributes use `var(--color-*)`.
+- **Fonts:** `font-sans` (system) and `font-mono` (JetBrains Mono) only. No custom font classes.
+- **Buttons:** `enabled:hover:` and `enabled:active:` prefixes to prevent hover styles when disabled.
 
-### Estrutura de Arquivos
-- Cada componente em arquivo próprio: `src/components/ui/{component-name}.tsx`
-- Interfaces exportadas com sufixo `Props`: `export interface ButtonProps`
-- Componentes com named exports: `export function Button()`
-
-### Estilização
-- **Sempre usar `tv()`** do `tailwind-variants` para estilização
-- Não misturar classes CSS com `tv()`
-- Cores seguem o design system (ver tokens)
-
-### Propagação de Props
-- Usar spread `{...props}` para permitir override de classes
-- Interfaces estendem `React.HTMLAttributes<HTMLDivElement>` quando apropriado
-
-## 2. Server vs Client Components
-
-### Regra Principal
-- **Server Components por padrão** (sem "use client")
-- `"use client"` apenas quando necessário:
-  - `useState`, `useEffect`, `useRef`
-  - Event handlers (`onClick`, `onChange`)
-  - Browser APIs
-
-### Padrão Async + Suspense
-Componentes async (ex: Shiki) **NÃO** podem ser usados diretamente em Client Components.
-
-**Solução:**
-```
-highlighted-code-block.tsx    ← async server component
-highlighted-code-block-client.tsx  ← "use client" + Suspense wrapper
-```
-
-## 3. Sistema de Temas
-
-### Tokens
-- Centralizados em: `src/lib/themes/tokens.ts`
-- Estrutura: `baseTokens.colors.{categoria}.{nome}`
-- Cores do design system:
-  - Green: `#10B981`
-  - Amber: `#F59E0B`
-  - Red: `#EF4444`
-  - Background page: `#0C0C0C`
-  - Background surface: `#171717`
-  - Background elevated: `#1A1A1A`
-  - Background input: `#111111`
-  - Border: `#2A2A2A`
-
-### ThemeProvider
-- Localização: `src/lib/themes/context.tsx`
-- Suporta: `mode` (light/dark/system) e `season`
-- Hook: `useTheme()` para acessar configurações
-
-## 4. Performance
-
-### PROIBIDO em Render
-- ❌ `Math.random()` para valores visuais → usar valores pré-definidos
-- ❌ `Math.random()` para IDs → usar `useId()` do React
-- ❌ `new Date()` para timestamps → usar `useMemo` ou servidor
-
-### Otimizações
-- `useMemo` para cálculos pesados
-- `useCallback` para callbacks estáveis
-- Lazy loading para bundles pesados (Shiki)
-
-## 5. Accessibility (A11y)
-
-### Obrigatório em Interações
-- `aria-expanded` em toggles/accordions
-- `aria-haspopup="listbox"` em selects
-- `aria-label` em botões sem texto
-- `role="listbox"` em dropdowns
-- `role="button"` em elementos clicáveis
-
-### OVERLAY (backdrop)
-- Usar `<button type="button">` em vez de `<div>` com click handlers
-- Sempre ter `aria-label` descritivo
-
-### Estados
-- `aria-selected` em tabs
-- `aria-disabled` quando aplicável
-- Focus visible: `focus-visible:ring-2 focus-visible:ring-[#10B981]`
-
-## 6. DRY (Don't Repeat Yourself)
-
-### Extrair Componentes
-- UI reutilizável → novo componente em `components/ui/`
-- Lógica duplicada → hook customizado em `hooks/`
-- Estilização similar → função `tv()` compartilhada
-
-### Try/Catch Pattern
-```tsx
-// ❌ DUPLICADO
-try {
-  return <ComponentA />
-} catch {
-  return <ComponentA />
-}
-
-// ✅ EXTRAIR
-function Content(props) { return <ComponentA {...props} /> }
-try { return <Content /> } catch { return <Content /> }
-```
-
-## 7. TypeScript
-
-### Boas Práticas
-- Tipos explícitos em interfaces públicas
-- `as const` para literais
-- Evitar `any` — usar `unknown` quando necessário
-- Exportar tipos quando reutilizáveis
-
-### Imports
-```tsx
-// ✅ CORRETO
-import { tv } from "tailwind-variants";
-import type { VariantProps } from "tailwind-variants";
-
-// ❌ ERRADO
-import { tv, type VariantProps } from "tailwind-variants";
-```
-
-## 8. Linting e Formatação
-
-### Biome
-```bash
-npx biome check src/          # Verificar
-npx biome check --write src/   # Corrigir
-npx biome check --write --unsafe src/  # Incluir fixes unsafe
-```
-
-### Regras Importantes
-- Comentários dentro de JSX → usar `{/* comment */}`
-- Não redeclarar funções/variáveis
-- `const` vs `let` — não atribuir a `const`
-
-## 9. Estrutura de Pastas
+## Project Structure
 
 ```
+specs/                # Feature specs written before implementation (see specs/AGENTS.md)
 src/
-├── app/                    # Next.js App Router
-│   ├── layout.tsx         # Layout raiz
-│   ├── page.tsx          # Homepage
-│   └── components/        # Página de showcase
-├── components/ui/         # Componentes UI
-│   ├── button.tsx
-│   ├── toggle.tsx
-│   └── ...
-├── lib/
-│   ├── themes/            # Sistema de temas
-│   │   ├── tokens.ts     # Definições de tokens
-│   │   ├── seasons.ts     # Temas sazonais
-│   │   ├── context.tsx    # ThemeProvider
-│   │   └── index.ts       # Exports
-│   └── shiki.ts           # Configuração Shiki
-└── hooks/                 # Hooks customizados (futuro)
+  app/                # Next.js App Router pages and layouts
+    api/trpc/         # tRPC HTTP handler (catch-all route)
+  components/         # Feature-level components (navbar, code-editor, etc.)
+    ui/               # Reusable UI primitives (see ui/AGENTS.md for patterns)
+  db/                 # Drizzle ORM schema, client, and seed
+  trpc/               # tRPC infrastructure (see trpc/AGENTS.md for patterns)
+    routers/          # tRPC routers (one file per domain)
+  hooks/              # Custom React hooks
+  lib/                # Shared utilities and constants
 ```
 
-## 10. Git Workflow
+## Data Fetching
 
-### Commits
--Conventional Commits: `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`
+- **Server Components:** Use `prefetch()` + `<HydrateClient>` to prefetch tRPC queries on the server and hydrate to client components. Import from `@/trpc/server`.
+- **Client Components:** Use `useQuery()` / `useSuspenseQuery()` with `trpc.router.procedure.queryOptions()`. Import `useTRPC` from `@/trpc/client`.
+- **Server-only data:** Use `caller` from `@/trpc/server` for data consumed exclusively in RSC (e.g. dynamic metadata).
+- **Animated numbers:** Use `@number-flow/react` (`<NumberFlow>`) for numeric values that transition from 0 to the loaded value. Prefer `useQuery` with `?? 0` fallback over Suspense/skeleton for these cases.
+- **Loading states:** Prefer `useQuery` + `NumberFlow` (0 → value animation) for numeric stats. Use `Suspense` + skeleton components for content-heavy sections (lists, cards, etc.).
 
-### Antes de Commit
-```bash
-npm run build      # Verificar TypeScript
-npx biome check src/  # Verificar lint
-```
+## Key Decisions
 
-<!-- END:devroast-patterns -->
+- `CodeBlock` is an async React Server Component using shiki with vesper theme
+- `Toggle` uses `@base-ui/react` Switch primitive for accessibility
+- `ScoreRing` has a single fixed size (180px)
+- Biome config has `noUnknownAtRules` ignore list for Tailwind directives (`@theme`, `@apply`, `@utility`)
+- tRPC context exposes `db` (Drizzle client) — no superjson needed (Drizzle returns plain serializable objects)
+- Feature specs must be written in `specs/` before implementing new features
